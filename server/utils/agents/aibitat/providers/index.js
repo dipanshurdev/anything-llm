@@ -23,7 +23,6 @@ const NovitaProvider = require("./novita.js");
 const NvidiaNimProvider = require("./nvidiaNim.js");
 const PPIOProvider = require("./ppio.js");
 const GeminiProvider = require("./gemini.js");
-const DellProAiStudioProvider = require("./dellProAiStudio.js");
 const MoonshotAiProvider = require("./moonshotAi.js");
 const CometApiProvider = require("./cometapi.js");
 const FoundryProvider = require("./foundry.js");
@@ -32,6 +31,9 @@ const CohereProvider = require("./cohere.js");
 const DockerModelRunnerProvider = require("./dockerModelRunner.js");
 const PrivatemodeProvider = require("./privatemode.js");
 const SambaNovaProvider = require("./sambanova.js");
+const LemonadeProvider = require("./lemonade.js");
+const MinimaxProvider = require("./minimax.js");
+const CerebrasProvider = require("./cerebras.js");
 
 module.exports = {
   OpenAIProvider,
@@ -60,7 +62,6 @@ module.exports = {
   NvidiaNimProvider,
   PPIOProvider,
   GeminiProvider,
-  DellProAiStudioProvider,
   MoonshotAiProvider,
   FoundryProvider,
   GiteeAIProvider,
@@ -68,4 +69,7 @@ module.exports = {
   DockerModelRunnerProvider,
   PrivatemodeProvider,
   SambaNovaProvider,
+  LemonadeProvider,
+  MinimaxProvider,
+  CerebrasProvider,
 };

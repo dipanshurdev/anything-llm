@@ -38,7 +38,7 @@
 
 这是一个全栈应用程序，可以将任何文档、资源（如网址链接、音频、视频）或内容片段转换为上下文，以便任何大语言模型（LLM）在聊天期间作为参考使用。此应用程序允许您选择使用哪个LLM或向量数据库，同时支持多用户管理并设置不同权限。
 
-![聊天](https://github.com/Mintplex-Labs/anything-llm/assets/16845892/cfc5f47c-bd91-4067-986c-f3f49621a859)
+![Chatting](https://github.com/Mintplex-Labs/anything-llm/releases/download/v1.11.2/AnythingLLM720p.gif)
 
 <details>
 <summary><kbd>观看演示视频！</kbd></summary>
@@ -49,9 +49,9 @@
 
 ### 产品概览
 
-AnythingLLM是一个全栈应用程序，您可以使用现成的商业大语言模型或流行的开源大语言模型，再结合向量数据库解决方案构建一个私有ChatGPT，不再受制于人：您可以本地运行，也可以远程托管，并能够与您提供的任何文档智能聊天。
+AnythingLLM是您一直在寻找的全方位AI应用程序。AnythingLLM包含了使用您喜爱的本地或云端LLM提供商构建私有ChatGPT所需的一切，毫无妥协。AnythingLLM高度可配置，但开箱即用，内置代理、多用户支持、向量数据库、文档摄取管道等功能。
 
-AnythingLLM将您的文档划分为称为`workspaces` (工作区)的对象。工作区的功能类似于线程，同时增加了文档的容器化。工作区可以共享文档，但工作区之间的内容不会互相干扰或污染，因此您可以保持每个工作区的上下文清晰。
+AnythingLLM还支持多用户，您可以控制每个用户的访问权限和体验，同时不会影响实例的安全性、隐私性或您的知识产权。
 
 ## AnythingLLM的一些酷炫特性
 
@@ -82,7 +82,6 @@ AnythingLLM将您的文档划分为称为`workspaces` (工作区)的对象。工
 - [Anthropic](https://www.anthropic.com/)
 - [NVIDIA NIM (聊天模型)](https://build.nvidia.com/explore/discover)
 - [Google Gemini Pro](https://ai.google.dev/)
-- [Hugging Face (聊天模型)](https://huggingface.co/)
 - [Ollama (聊天模型)](https://ollama.ai/)
 - [LM Studio (所有模型)](https://lmstudio.ai)
 - [LocalAI (所有模型)](https://localai.io/)
@@ -106,6 +105,9 @@ AnythingLLM将您的文档划分为称为`workspaces` (工作区)的对象。工
 - [Docker Model Runner](https://docs.docker.com/ai/model-runner/)
 - [PrivateModeAI (chat models)](https://privatemode.ai/)
 - [SambaNova Cloud (chat models)](https://cloud.sambanova.ai/)
+- [Lemonade by AMD](https://lemonade-server.ai)
+- [Minimax](https://platform.minimax.io)
+- [Cerebras (chat models)](https://www.cerebras.ai/)
 
 **支持的嵌入模型：**
 
@@ -180,16 +182,6 @@ Mintplex Labs和社区维护了许多部署方法、脚本和模板，您可以�
 
 [了解文档](../server/storage/documents/DOCUMENTS.md)
 
-[了解向量缓存](../server/storage/vector-cache/VECTOR_CACHE.md)
-
-## 外部应用与集成
-
-_以下是一些与 AnythingLLM 兼容的应用程序，但并非由 Mintplex Labs 维护。列在此处并不代表官方背书。_
-
-- [Midori AI 子系统管理器 - 使用 Docker 容器技术高效部署 AI 系统的简化方式](https://io.midori-ai.xyz/subsystem/anythingllm/) - 使用 Docker 容器技术高效部署 AI 系统的简化方式。
-- [Coolify](https://coolify.io/docs/services/anythingllm/) - 一键部署 AnythingLLM。
-- [适用于 Microsoft Word 的 GPTLocalhost](https://gptlocalhost.com/demo/) - 一个本地 Word 插件，让你可以在 Microsoft Word 中使用 AnythingLLM。
-
 ## 远程信息收集与隐私保护
 
 由 Mintplex Labs Inc 开发的 AnythingLLM 包含一个收集匿名使用信息的 Telemetry 功能。
@@ -262,7 +254,7 @@ _以下是一些与 AnythingLLM 兼容的应用程序，但并非由 Mintplex La
 
 ---
 
-版权所有 © 2025 [Mintplex Labs][profile-link]。<br />
+版权所有 © 2026 [Mintplex Labs][profile-link]。<br />
 本项目采用[MIT](https://github.com/Mintplex-Labs/anything-llm/blob/master/LICENSE)许可证。
 
 <!-- LINK GROUP -->

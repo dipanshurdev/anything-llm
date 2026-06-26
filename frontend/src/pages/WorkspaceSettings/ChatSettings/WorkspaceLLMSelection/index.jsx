@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import AnythingLLMIcon from "@/media/logo/anything-llm-icon.png";
 import WorkspaceLLMItem from "./WorkspaceLLMItem";
-import { AVAILABLE_LLM_PROVIDERS } from "@/pages/GeneralSettings/LLMPreference";
+import { ALL_LLM_PROVIDERS } from "@/pages/GeneralSettings/LLMPreference";
 import { CaretUpDown, MagnifyingGlass, X } from "@phosphor-icons/react";
 import ChatModelSelection from "./ChatModelSelection";
+import RouterSelection from "./RouterSelection";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import paths from "@/utils/paths";
@@ -11,11 +12,11 @@ import paths from "@/utils/paths";
 // Some providers do not support model selection via /models.
 // In that case we allow the user to enter the model name manually and hope they
 // type it correctly.
-const FREE_FORM_LLM_SELECTION = ["bedrock", "azure", "generic-openai"];
+const FREE_FORM_LLM_SELECTION = ["azure"];
 
 // Some providers do not support model selection via /models
 // and only have a fixed single-model they can use.
-const NO_MODEL_SELECTION = ["default", "huggingface"];
+const NO_MODEL_SELECTION = ["default", "anythingllm-router"];
 
 // Some providers we just fully disable for ease of use.
 const DISABLED_PROVIDERS = [];
@@ -29,7 +30,7 @@ const LLM_DEFAULT = {
   requiredConfig: [],
 };
 
-const LLMS = [LLM_DEFAULT, ...AVAILABLE_LLM_PROVIDERS].filter(
+const LLMS = [LLM_DEFAULT, ...ALL_LLM_PROVIDERS].filter(
   (llm) => !DISABLED_PROVIDERS.includes(llm.value)
 );
 
@@ -71,12 +72,12 @@ export default function WorkspaceLLMSelection({
   const selectedLLMObject = LLMS.find((llm) => llm.value === selectedLLM);
 
   return (
-    <div className="border-b border-white/40 pb-8">
-      <div className="flex flex-col">
+    <div className="flex flex-col gap-y-[8px]">
+      <div className="flex flex-col gap-y-[8px]">
         <label htmlFor="name" className="block input-label">
           {t("chat.llm.title")}
         </label>
-        <p className="text-white text-opacity-60 text-xs font-medium py-1.5">
+        <p className="text-white text-opacity-60 text-xs font-medium">
           {t("chat.llm.description")}
         </p>
       </div>
@@ -149,7 +150,7 @@ export default function WorkspaceLLMSelection({
                 <div className="text-sm font-semibold text-white">
                   {selectedLLMObject.name}
                 </div>
-                <div className="mt-1 text-xs text-description">
+                <div className="text-xs text-description">
                   {selectedLLMObject.description}
                 </div>
               </div>
@@ -169,10 +170,16 @@ export default function WorkspaceLLMSelection({
 
 // TODO: Add this to agent selector as well as make generic component.
 function ModelSelector({ selectedLLM, workspace, setHasChanges }) {
+  if (selectedLLM === "anythingllm-router") {
+    return (
+      <RouterSelection workspace={workspace} setHasChanges={setHasChanges} />
+    );
+  }
+
   if (NO_MODEL_SELECTION.includes(selectedLLM)) {
     if (selectedLLM !== "default") {
       return (
-        <div className="w-full h-10 justify-center items-center flex mt-4">
+        <div className="w-full h-10 justify-center items-center flex">
           <p className="text-sm font-base text-white text-opacity-60 text-center">
             Multi-model support is not supported for this provider yet.
             <br />
@@ -205,9 +212,9 @@ function ModelSelector({ selectedLLM, workspace, setHasChanges }) {
 function FreeFormLLMInput({ workspace, setHasChanges }) {
   const { t } = useTranslation();
   return (
-    <div className="mt-4 flex flex-col gap-y-1">
+    <div className="flex flex-col gap-y-[8px]">
       <label className="block input-label">{t("chat.model.title")}</label>
-      <p className="text-white text-opacity-60 text-xs font-medium py-1.5">
+      <p className="text-white text-opacity-60 text-xs font-medium">
         {t("chat.model.description")}
       </p>
       <input

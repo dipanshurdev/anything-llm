@@ -17,24 +17,24 @@ const docSummarizer = {
           name: this.name,
           controller: new AbortController(),
           description:
-            "Can get the list of files available to search with descriptions and can select a single file to open and summarize.",
+            "List all documents in the workspace or summarize a specific document. See what files are available, get a summary of a document's contents, or read and condense a file into key points.",
           examples: [
             {
-              prompt: "Summarize example.txt",
-              call: JSON.stringify({
-                action: "summarize",
-                document_filename: "example.txt",
-              }),
-            },
-            {
-              prompt: "What files can you see?",
+              prompt: "List my files",
               call: JSON.stringify({ action: "list", document_filename: null }),
             },
             {
-              prompt: "Tell me about readme.md",
+              prompt: "Summarize the readme file",
               call: JSON.stringify({
                 action: "summarize",
                 document_filename: "readme.md",
+              }),
+            },
+            {
+              prompt: "Give me a summary of example.txt",
+              call: JSON.stringify({
+                action: "summarize",
+                document_filename: "example.txt",
               }),
             },
           ],
@@ -136,6 +136,15 @@ const docSummarizer = {
                 );
               }
 
+              // Report citation for the document being summarized
+              this.super.addCitation?.({
+                id: docInfo.document_id,
+                title: document.title || filename,
+                text: document.content,
+                chunkSource: null,
+                score: null,
+              });
+
               const { TokenManager } = require("../../../helpers/tiktoken");
               if (
                 new TokenManager(this.super.model).countFromString(
@@ -149,19 +158,26 @@ const docSummarizer = {
                 `${this.caller}: Summarizing ${filename ?? ""}...`
               );
 
-              this.super.onAbort(() => {
+              // Use a named listener so we can remove it after summarization completes,
+              // preventing listener accumulation when summarizing many documents.
+              const abortListener = () => {
                 this.super.handlerProps.log(
                   "Abort was triggered, exiting summarization early."
                 );
                 this.controller.abort();
-              });
+              };
+              this.super.emitter.on("abort", abortListener);
+              const cleanup = () => {
+                this.super.emitter.removeListener("abort", abortListener);
+              };
 
               return await summarizeContent({
                 provider: this.super.provider,
                 model: this.super.model,
                 controllerSignal: this.controller.signal,
                 content: document.content,
-              });
+                aibitat: this.super,
+              }).finally(cleanup);
             } catch (error) {
               this.super.handlerProps.log(
                 `document-summarizer.summarizeDoc raised an error. ${error.message}`

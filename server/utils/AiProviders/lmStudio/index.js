@@ -132,12 +132,12 @@ class LMStudioLLM {
       this.#slog(
         "No context windows cached - Context window may be inaccurately reported."
       );
-      return process.env.LMSTUDIO_MODEL_TOKEN_LIMIT || 4096;
+      return process.env.LMSTUDIO_MODEL_TOKEN_LIMIT || 16384;
     }
 
     let userDefinedLimit = null;
     const systemDefinedLimit =
-      Number(this.modelContextWindows[modelName]) || 4096;
+      Number(this.modelContextWindows[modelName]) || 16384;
 
     if (
       process.env.LMSTUDIO_MODEL_TOKEN_LIMIT &&
@@ -212,6 +212,22 @@ class LMStudioLLM {
     ];
   }
 
+  /**
+   * Parses and prepends reasoning from the response and returns the full text response.
+   * Used for getChatCompletions to render thinking text if present in full response.
+   * @param {Object} message - The message object from the LMStudio response.
+   * @returns {string}
+   */
+  #parseReasoningFromResponse({ message }) {
+    let textResponse = message?.content ?? "";
+    if (
+      !!message?.reasoning_content &&
+      message.reasoning_content.trim().length > 0
+    )
+      textResponse = `<think>${message.reasoning_content}</think>${textResponse}`;
+    return textResponse;
+  }
+
   async getChatCompletion(messages = null, { temperature = 0.7 }) {
     if (!this.model)
       throw new Error(
@@ -233,7 +249,7 @@ class LMStudioLLM {
       return null;
 
     return {
-      textResponse: result.output.choices[0].message.content,
+      textResponse: this.#parseReasoningFromResponse(result.output.choices[0]),
       metrics: {
         prompt_tokens: result.output.usage?.prompt_tokens || 0,
         completion_tokens: result.output.usage?.completion_tokens || 0,
@@ -272,6 +288,60 @@ class LMStudioLLM {
     return handleDefaultStreamResponseV2(response, stream, responseProps);
   }
 
+  /**
+   * Returns the capabilities of the model.
+   * This uses the new /api/v1 endpoint, which returns the model info in a different format.
+   * @returns {Promise<{tools: 'unknown' | boolean, reasoning: 'unknown' | boolean, imageGeneration: 'unknown' | boolean, vision: 'unknown' | boolean}>}
+   */
+  async getModelCapabilities() {
+    try {
+      const endpoint = new URL(
+        parseLMStudioBasePath(process.env.LMSTUDIO_BASE_PATH, "v1")
+      );
+      const apiKey = process.env.LMSTUDIO_AUTH_TOKEN ?? null;
+      endpoint.pathname += "/models";
+      const modelInfo =
+        (await fetch(endpoint.toString(), {
+          headers: {
+            "Content-Type": "application/json",
+            ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+          },
+        })
+          .then((res) => {
+            if (!res.ok)
+              throw new Error(
+                `LMStudio:getModelCapabilities - ${res.statusText}`
+              );
+            return res.json();
+          })
+          .then(({ models = [] }) =>
+            models.find((model) => model.key === this.model)
+          )) || {};
+
+      const capabilities = modelInfo.hasOwnProperty("capabilities")
+        ? modelInfo.capabilities
+        : {
+            trained_for_tool_use: "unknown",
+            vision: "unknown",
+          };
+
+      return {
+        tools: capabilities.trained_for_tool_use,
+        reasoning: "unknown",
+        imageGeneration: "unknown", // LM Studio does not support image generation yet.
+        vision: capabilities.vision,
+      };
+    } catch (error) {
+      console.error("Error getting model capabilities:", error);
+      return {
+        tools: "unknown",
+        reasoning: "unknown",
+        imageGeneration: "unknown",
+        vision: "unknown",
+      };
+    }
+  }
+
   // Simple wrapper for dynamic embedder & normalize interface for all LLM implementations
   async embedTextInput(textInput) {
     return await this.embedder.embedTextInput(textInput);
@@ -292,14 +362,17 @@ class LMStudioLLM {
  * Parse the base path for the LMStudio API. Since the base path must end in /v1 and cannot have a trailing slash,
  * and the user can possibly set it to anything and likely incorrectly due to pasting behaviors, we need to ensure it is in the correct format.
  * @param {string} basePath
+ * @param {'legacy' | 'v1'} apiVersion
  * @returns {string}
  */
-function parseLMStudioBasePath(providedBasePath = "") {
+function parseLMStudioBasePath(providedBasePath = "", apiVersion = "legacy") {
   try {
     const baseURL = new URL(providedBasePath);
-    const basePath = `${baseURL.origin}/v1`;
+    let basePath = `${baseURL.origin}`;
+    if (apiVersion === "legacy") basePath += `/v1`;
+    if (apiVersion === "v1") basePath += `/api/v1`;
     return basePath;
-  } catch (e) {
+  } catch {
     return providedBasePath;
   }
 }

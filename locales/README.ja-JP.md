@@ -38,7 +38,7 @@
 
 これは、任意のドキュメント、リソース、またはコンテンツの断片を、チャット中にLLMが参照として使用できるコンテキストに変換できるフルスタックアプリケーションです。このアプリケーションを使用すると、使用するLLMまたはベクトルデータベースを選択し、マルチユーザー管理と権限をサポートできます。
 
-![チャット](https://github.com/Mintplex-Labs/anything-llm/assets/16845892/cfc5f47c-bd91-4067-986c-f3f49621a859)
+![Chatting](https://github.com/Mintplex-Labs/anything-llm/releases/download/v1.11.2/AnythingLLM720p.gif)
 
 <details>
 <summary><kbd>デモを見る！</kbd></summary>
@@ -49,9 +49,9 @@
 
 ### 製品概要
 
-AnythingLLMは、市販のLLMや人気のあるオープンソースLLM、およびベクトルDBソリューションを使用して、妥協のないプライベートChatGPTを構築できるフルスタックアプリケーションです。ローカルで実行することも、リモートでホストすることもでき、提供されたドキュメントと知的にチャットできます。
+AnythingLLMは、あなたが探していたオールインワンAIアプリです。AnythingLLMには、お気に入りのローカルまたはクラウドLLMプロバイダーを使用して、妥協のないプライベートChatGPTを構築するために必要なすべてが含まれています。AnythingLLMは高度にカスタマイズ可能でありながら、ビルトインエージェント、マルチユーザーサポート、ベクトルデータベース、ドキュメント取り込みパイプラインなど、すぐに使い始めるために必要なすべてが揃っています。
 
-AnythingLLMは、ドキュメントを`ワークスペース`と呼ばれるオブジェクトに分割します。ワークスペースはスレッドのように機能しますが、ドキュメントのコンテナ化が追加されています。ワークスペースはドキュメントを共有できますが、互いに通信することはないため、各ワークスペースのコンテキストをクリーンに保つことができます。
+AnythingLLMは複数ユーザーもサポートしており、インスタンスのセキュリティやプライバシー、知的財産を損なうことなく、ユーザーごとにアクセスと体験を制御できます。
 
 ## AnythingLLMのいくつかのクールな機能
 
@@ -77,7 +77,6 @@ AnythingLLMは、ドキュメントを`ワークスペース`と呼ばれるオ�
 - [Azure OpenAI](https://azure.microsoft.com/en-us/products/ai-services/openai-service)
 - [Anthropic](https://www.anthropic.com/)
 - [Google Gemini Pro](https://ai.google.dev/)
-- [Hugging Face (チャットモデル)](https://huggingface.co/)
 - [Ollama (チャットモデル)](https://ollama.ai/)
 - [LM Studio (すべてのモデル)](https://lmstudio.ai)
 - [LocalAi (すべてのモデル)](https://localai.io/)
@@ -97,6 +96,9 @@ AnythingLLMは、ドキュメントを`ワークスペース`と呼ばれるオ�
 - [Docker Model Runner](https://docs.docker.com/ai/model-runner/)
 - [PrivateModeAI (chat models)](https://privatemode.ai/)
 - [SambaNova Cloud (chat models)](https://cloud.sambanova.ai/)
+- [Lemonade by AMD](https://lemonade-server.ai)
+- [Minimax](https://platform.minimax.io)
+- [Cerebras (chat models)](https://www.cerebras.ai/)
 
 **埋め込みモデル：**
 
@@ -168,8 +170,6 @@ Mintplex Labsおよびコミュニティは、AnythingLLMをローカルで実�
 
 [ドキュメントについて学ぶ](../server/storage/documents/DOCUMENTS.md)
 
-[ベクトルキャッシュについて学ぶ](../server/storage/vector-cache/VECTOR_CACHE.md)
-
 ## 貢献する方法
 
 - issueを作成する
@@ -220,7 +220,7 @@ Mintplex Labs Inc.によって開発されたAnythingLLMには、匿名の使用
 
 ---
 
-Copyright © 2025 [Mintplex Labs][profile-link]。<br />
+Copyright © 2026 [Mintplex Labs][profile-link]。<br />
 このプロジェクトは[MIT](https://github.com/Mintplex-Labs/anything-llm/blob/master/LICENSE)ライセンスの下でライセンスされています。
 
 <!-- LINK GROUP -->

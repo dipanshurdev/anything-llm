@@ -12,7 +12,11 @@ const {
   multiUserMode,
   queryParams,
 } = require("../utils/http");
-const { handleAssetUpload, handlePfpUpload } = require("../utils/files/multer");
+const {
+  handleAssetUpload,
+  handlePfpUpload,
+  handleAudioUpload,
+} = require("../utils/files/multer");
 const { v4 } = require("uuid");
 const { SystemSettings } = require("../models/systemSettings");
 const { User } = require("../models/user");
@@ -30,7 +34,6 @@ const {
   isDefaultFilename,
 } = require("../utils/files/logo");
 const { Telemetry } = require("../models/telemetry");
-const { WelcomeMessages } = require("../models/welcomeMessages");
 const { ApiKey } = require("../models/apiKeys");
 const { getCustomModels } = require("../utils/helpers/customModels");
 const { WorkspaceChats } = require("../models/workspaceChats");
@@ -51,6 +54,7 @@ const {
 const { SlashCommandPresets } = require("../models/slashCommandsPresets");
 const { EncryptionManager } = require("../utils/EncryptionManager");
 const { BrowserExtensionApiKey } = require("../models/browserExtensionApiKey");
+const { MobileDevice } = require("../models/mobileDevice");
 const {
   chatHistoryViewable,
 } = require("../utils/middleware/chatHistoryViewable");
@@ -61,6 +65,8 @@ const {
 const { TemporaryAuthToken } = require("../models/temporaryAuthToken");
 const { SystemPromptVariables } = require("../models/systemPromptVariables");
 const { VALID_COMMANDS } = require("../utils/chats");
+const { AgentSkillWhitelist } = require("../models/agentSkillWhitelist");
+const { Memory } = require("../models/memory");
 
 function systemEndpoints(app) {
   if (!app) return;
@@ -620,7 +626,11 @@ function systemEndpoints(app) {
           multi_user_mode: true,
         });
         await BrowserExtensionApiKey.migrateApiKeysToMultiUser(user.id);
-
+        await Memory.migrateToMultiUser(user.id);
+        await WorkspaceChats.migrateToMultiUser(user.id);
+        await MobileDevice.migrateDevicesToMultiUser(user.id);
+        await SlashCommandPresets.migrateToMultiUser(user.id);
+        await AgentSkillWhitelist.clearSingleUserWhitelist();
         await updateENV(
           {
             JWTSecret: process.env.JWT_SECRET || v4(),
@@ -962,50 +972,6 @@ function systemEndpoints(app) {
     }
   );
 
-  app.get(
-    "/system/welcome-messages",
-    [validatedRequest, flexUserRoleValid([ROLES.all])],
-    async function (_, response) {
-      try {
-        const welcomeMessages = await WelcomeMessages.getMessages();
-        response.status(200).json({ success: true, welcomeMessages });
-      } catch (error) {
-        console.error("Error fetching welcome messages:", error);
-        response
-          .status(500)
-          .json({ success: false, message: "Internal server error" });
-      }
-    }
-  );
-
-  app.post(
-    "/system/set-welcome-messages",
-    [validatedRequest, flexUserRoleValid([ROLES.admin, ROLES.manager])],
-    async (request, response) => {
-      try {
-        const { messages = [] } = reqBody(request);
-        if (!Array.isArray(messages)) {
-          return response.status(400).json({
-            success: false,
-            message: "Invalid message format. Expected an array of messages.",
-          });
-        }
-
-        await WelcomeMessages.saveAll(messages);
-        return response.status(200).json({
-          success: true,
-          message: "Welcome messages saved successfully.",
-        });
-      } catch (error) {
-        console.error("Error processing the welcome messages:", error);
-        response.status(500).json({
-          success: true,
-          message: "Error saving the welcome messages.",
-        });
-      }
-    }
-  );
-
   app.get("/system/api-keys", [validatedRequest], async (_, response) => {
     try {
       if (response.locals.multiUserMode) {
@@ -1029,16 +995,17 @@ function systemEndpoints(app) {
   app.post(
     "/system/generate-api-key",
     [validatedRequest],
-    async (_, response) => {
+    async (request, response) => {
       try {
         if (response.locals.multiUserMode) {
           return response.sendStatus(401).end();
         }
 
-        const { apiKey, error } = await ApiKey.create();
+        const { name = null } = reqBody(request);
+        const { apiKey, error } = await ApiKey.create(null, name);
         await EventLogs.logEvent(
           "api_key_created",
-          {},
+          { name: apiKey?.name },
           response?.locals?.user?.id
         );
         return response.status(200).json({
@@ -1086,11 +1053,17 @@ function systemEndpoints(app) {
     [validatedRequest, flexUserRoleValid([ROLES.admin])],
     async (request, response) => {
       try {
-        const { provider, apiKey = null, basePath = null } = reqBody(request);
+        const {
+          provider,
+          apiKey = null,
+          basePath = null,
+          options = {},
+        } = reqBody(request);
         const { models, error } = await getCustomModels(
           provider,
           apiKey,
-          basePath
+          basePath,
+          options
         );
         return response.status(200).json({
           models,
@@ -1503,11 +1476,48 @@ function systemEndpoints(app) {
   );
 
   app.post(
+    "/system/transcribe-audio",
+    [validatedRequest, flexUserRoleValid([ROLES.all]), handleAudioUpload],
+    async (request, response) => {
+      try {
+        if (!request.file?.buffer) {
+          return response
+            .status(400)
+            .json({ success: false, error: "No audio file provided." });
+        }
+
+        const provider = process.env.STT_PROVIDER || "native";
+        if (provider === "native") {
+          return response.status(400).json({
+            success: false,
+            error:
+              "Server-side transcription is disabled. Set STT_PROVIDER to a supported provider.",
+          });
+        }
+
+        const { getSTTProvider } = require("../utils/SpeechToText");
+        const stt = getSTTProvider();
+        const text = await stt.transcribe(
+          request.file.buffer,
+          request.file.originalname || "audio.webm"
+        );
+        return response.status(200).json({ success: true, text });
+      } catch (error) {
+        console.error("STT transcription error:", error);
+        return response.status(500).json({
+          success: false,
+          error: error.message || "Transcription failed",
+        });
+      }
+    }
+  );
+
+  app.post(
     "/system/validate-sql-connection",
     [validatedRequest, flexUserRoleValid([ROLES.admin])],
     async (request, response) => {
+      const { engine, connectionString } = reqBody(request);
       try {
-        const { engine, connectionString } = reqBody(request);
         if (!engine || !connectionString) {
           return response.status(400).json({
             success: false,

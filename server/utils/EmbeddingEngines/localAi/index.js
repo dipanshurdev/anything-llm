@@ -1,4 +1,8 @@
-const { toChunks, maximumChunkLength } = require("../../helpers");
+const {
+  toChunks,
+  maximumChunkLength,
+  reportEmbeddingProgress,
+} = require("../../helpers");
 
 class LocalAiEmbedder {
   constructor() {
@@ -50,19 +54,28 @@ class LocalAiEmbedder {
 
   async embedChunks(textChunks = []) {
     const embeddingRequests = [];
+    let chunksProcessed = 0;
     for (const chunk of toChunks(textChunks, this.maxConcurrentChunks)) {
       embeddingRequests.push(
         new Promise((resolve) => {
+          // Dev: LocalAI versions < v2.29 ignored encoding_format and always returned float arrays,
+          // causing the OpenAI SDK's default base64 decode to silently produce dims/4 zero vectors.
+          // Fixed in LocalAI PR #9135 (Mar 2026). Pinning "float" here for safety with older versions.
           this.openai.embeddings
             .create({
               model: this.model,
               input: chunk,
               dimensions: this.outputDimensions,
+              encoding_format: "float",
             })
             .then((result) => {
+              chunksProcessed += chunk.length;
+              reportEmbeddingProgress(chunksProcessed, textChunks.length);
               resolve({ data: result?.data, error: null });
             })
             .catch((e) => {
+              chunksProcessed += chunk.length;
+              reportEmbeddingProgress(chunksProcessed, textChunks.length);
               e.type =
                 e?.response?.data?.error?.code ||
                 e?.response?.status ||

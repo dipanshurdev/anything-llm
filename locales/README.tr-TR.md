@@ -38,7 +38,7 @@ Belgelerinizle sohbet edin, yapay zeka ajanlarını kullanın, son derece özell
 
 Herhangi bir belgeyi, kaynağı veya içeriği sohbet sırasında herhangi bir büyük dil modelinin referans olarak kullanabileceği bir bağlama dönüştürmenizi sağlayan tam kapsamlı bir uygulama. Bu uygulama, kullanmak istediğiniz LLM veya Vektör Veritabanını seçmenize olanak tanırken, çok kullanıcılı yönetim ve yetkilendirme desteği de sunar.
 
-![Mesajlaşma](https://github.com/Mintplex-Labs/anything-llm/assets/16845892/cfc5f47c-bd91-4067-986c-f3f49621a859)
+![Chatting](https://github.com/Mintplex-Labs/anything-llm/releases/download/v1.11.2/AnythingLLM720p.gif)
 
 <details>
 <summary><kbd>Demoyu izle!</kbd></summary>
@@ -49,9 +49,9 @@ Herhangi bir belgeyi, kaynağı veya içeriği sohbet sırasında herhangi bir b
 
 ### Ürün Genel Bakışı
 
-AnythingLLM, ticari hazır büyük dil modellerini veya popüler açık kaynak LLM'leri ve vektör veritabanı çözümlerini kullanarak, hiçbir ödün vermeden özel bir ChatGPT oluşturmanıza olanak tanıyan tam kapsamlı bir uygulamadır. Bu uygulamayı yerel olarak çalıştırabilir veya uzaktan barındırarak sağladığınız belgelerle akıllı sohbetler gerçekleştirebilirsiniz.
+AnythingLLM, aradığınız hepsi bir arada yapay zeka uygulamasıdır. AnythingLLM, favori yerel veya bulut LLM sağlayıcılarınızı kullanarak hiçbir ödün vermeden özel bir ChatGPT oluşturmak için ihtiyacınız olan her şeyi içerir. AnythingLLM son derece özelleştirilebilir olmakla birlikte, yerleşik ajanlar, çok kullanıcılı destek, vektör veritabanları, belge alma işlem hatları ve daha fazlası gibi hemen başlamak için ihtiyacınız olan her şeyle birlikte gelir.
 
-AnythingLLM, belgelerinizi **"çalışma alanları" (workspaces)** adı verilen nesnelere ayırır. Bir çalışma alanı, bir sohbet dizisi gibi çalışır ancak belgelerinizi kapsülleyen bir yapı sunar. Çalışma alanları belgeleri paylaşabilir, ancak birbirleriyle iletişim kurmaz, böylece her çalışma alanının bağlamını temiz tutabilirsiniz.
+AnythingLLM ayrıca birden fazla kullanıcıyı da destekler; burada örneğin güvenliğini veya gizliliğini ya da fikri mülkiyetinizi tehlikeye atmadan kullanıcı başına erişimi ve deneyimi kontrol edebilirsiniz.
 
 ## AnythingLLM’in Harika Özellikleri
 
@@ -81,7 +81,6 @@ AnythingLLM, belgelerinizi **"çalışma alanları" (workspaces)** adı verilen 
 - [Anthropic](https://www.anthropic.com/)
 - [NVIDIA NIM (chat models)](https://build.nvidia.com/explore/discover)
 - [Google Gemini Pro](https://ai.google.dev/)
-- [Hugging Face (chat models)](https://huggingface.co/)
 - [Ollama (chat models)](https://ollama.ai/)
 - [LM Studio (all models)](https://lmstudio.ai)
 - [LocalAi (all models)](https://localai.io/)
@@ -104,6 +103,9 @@ AnythingLLM, belgelerinizi **"çalışma alanları" (workspaces)** adı verilen 
 - [Docker Model Runner](https://docs.docker.com/ai/model-runner/)
 - [PrivateModeAI (chat models)](https://privatemode.ai/)
 - [SambaNova Cloud (chat models)](https://cloud.sambanova.ai/)
+- [Lemonade by AMD](https://lemonade-server.ai)
+- [Minimax](https://platform.minimax.io)
+- [Cerebras (chat models)](https://www.cerebras.ai/)
 
 **Embedder modelleri:**
 
@@ -178,16 +180,6 @@ Mintplex Labs ve topluluk, AnythingLLM'i yerel olarak çalıştırmak için çe�
 
 [Belgeler hakkında bilgi edinin](../server/storage/documents/DOCUMENTS.md)
 
-[Vektör önbellekleme hakkında bilgi edinin](../server/storage/vector-cache/VECTOR_CACHE.md)
-
-## Harici Uygulamalar ve Entegrasyonlar
-
-_Bu uygulamalar Mintplex Labs tarafından yönetilmemektedir, ancak AnythingLLM ile uyumludur. Burada listelenmeleri bir onay anlamına gelmez._
-
-- [Midori AI Alt Sistem Yöneticisi](https://io.midori-ai.xyz/subsystem/anythingllm/) - Docker konteyner teknolojisini kullanarak yapay zeka sistemlerini verimli bir şekilde dağıtmanın pratik bir yolu.
-- [Coolify](https://coolify.io/docs/services/anythingllm/) - Tek tıklamayla AnythingLLM dağıtımı yapmanıza olanak tanır.
-- [GPTLocalhost for Microsoft Word](https://gptlocalhost.com/demo/) - AnythingLLM’i Microsoft Word içinde kullanmanıza olanak tanıyan yerel bir Word eklentisi.
-
 ## Telemetri ve Gizlilik
 
 Mintplex Labs Inc. tarafından geliştirilen AnythingLLM, anonim kullanım bilgilerini toplayan bir telemetri özelliği içermektedir.
@@ -244,7 +236,7 @@ Bu verileri doğrulamak için kod içinde **`Telemetry.sendTelemetry` çağrıla
 
 ---
 
-Telif Hakkı © 2025 [Mintplex Labs][profile-link]. <br />
+Telif Hakkı © 2026 [Mintplex Labs][profile-link]. <br />
 Bu proje [MIT](../LICENSE) lisansı ile lisanslanmıştır.
 
 <!-- LINK GROUP -->

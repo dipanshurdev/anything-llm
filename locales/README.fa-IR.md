@@ -40,7 +40,7 @@
 یک اپلیکیشن کامل که به شما امکان می‌دهد هر سند، منبع یا محتوایی را به زمینه‌ای تبدیل کنید که هر LLM می‌تواند در حین گفتگو به عنوان مرجع از آن استفاده کند. این برنامه به شما اجازه می‌دهد LLM یا پایگاه داده برداری مورد نظر خود را انتخاب کنید و همچنین از مدیریت چند کاربره و مجوزها پشتیبانی می‌کند.
 </div>
 
-![Chatting](https://github.com/Mintplex-Labs/anything-llm/assets/16845892/cfc5f47c-bd91-4067-986c-f3f49621a859)
+![Chatting](https://github.com/Mintplex-Labs/anything-llm/releases/download/v1.11.2/AnythingLLM720p.gif)
 
 <details>
 <summary><kbd>دموی ویدیویی را تماشا کنید!</kbd></summary>
@@ -52,9 +52,9 @@
 
 ### نمای کلی محصول
 
-AnythingLLM یک اپلیکیشن کامل است که در آن می‌توانید از LLM‌های تجاری آماده یا LLM‌های متن‌باز محبوب و راه‌حل‌های vectorDB برای ساخت یک ChatGPT خصوصی بدون محدودیت استفاده کنید که می‌توانید آن را به صورت محلی اجرا کنید یا از راه دور میزبانی کنید و با هر سندی که به آن ارائه می‌دهید، هوشمندانه گفتگو کنید.
+AnythingLLM اپلیکیشن همه‌کاره هوش مصنوعی است که به دنبال آن بودید. AnythingLLM شامل همه چیزهایی است که برای ساخت یک ChatGPT خصوصی بدون سازش با استفاده از ارائه‌دهندگان LLM محلی یا ابری مورد علاقه خود نیاز دارید. AnythingLLM بسیار قابل پیکربندی است، اما همه چیزهایی که برای شروع کار نیاز دارید از جمله عامل‌های داخلی، پشتیبانی چند کاربره، پایگاه‌های داده برداری، خطوط لوله دریافت اسناد و موارد دیگر را به صورت آماده ارائه می‌دهد.
 
-AnythingLLM اسناد شما را به اشیایی به نام `workspaces` تقسیم می‌کند. یک Workspace مانند یک رشته عمل می‌کند، اما با اضافه شدن کانتینرسازی اسناد شما. Workspaceها می‌توانند اسناد را به اشتراک بگذارند، اما با یکدیگر ارتباط برقرار نمی‌کنند تا بتوانید زمینه هر workspace را تمیز نگه دارید.
+AnythingLLM همچنین از چندین کاربر پشتیبانی می‌کند که می‌توانید دسترسی و تجربه هر کاربر را بدون به خطر انداختن امنیت یا حریم خصوصی نمونه یا مالکیت فکری خود کنترل کنید.
 
 </div>
 <div dir="rtl">
@@ -86,7 +86,6 @@ AnythingLLM اسناد شما را به اشیایی به نام `workspaces` ت
 - [Anthropic](https://www.anthropic.com/)
 - [NVIDIA NIM (chat models)](https://build.nvidia.com/explore/discover)
 - [Google Gemini Pro](https://ai.google.dev/)
-- [Hugging Face (chat models)](https://huggingface.co/)
 - [Ollama (chat models)](https://ollama.ai/)
 - [LM Studio (all models)](https://lmstudio.ai)
 - [LocalAi (all models)](https://localai.io/)
@@ -109,6 +108,9 @@ AnythingLLM اسناد شما را به اشیایی به نام `workspaces` ت
 - [Docker Model Runner](https://docs.docker.com/ai/model-runner/)
 - [PrivateModeAI (chat models)](https://privatemode.ai/)
 - [SambaNova Cloud (chat models)](https://cloud.sambanova.ai/)
+- [Lemonade by AMD](https://lemonade-server.ai)
+- [Minimax](https://platform.minimax.io)
+- [Cerebras (chat models)](https://www.cerebras.ai/)
 
 <div dir="rtl">
 
@@ -194,8 +196,6 @@ Mintplex Labs و جامعه کاربران، روش‌ها، اسکریپت‌ه
 
 [درباره اسناد بیشتر بدانید](../server/storage/documents/DOCUMENTS.md)
 
-[درباره کش‌کردن بردار بیشتر بدانید](../server/storage/vector-cache/VECTOR_CACHE.md)
-
 ## تله‌متری و حریم خصوصی
 
 AnythingLLM توسط Mintplex Labs Inc دارای ویژگی تله‌متری است که اطلاعات استفاده ناشناس را جمع‌آوری می‌کند.
@@ -267,7 +267,7 @@ AnythingLLM توسط Mintplex Labs Inc دارای ویژگی تله‌متری �
 
 <div dir="ltr" align="left">
 
-Copyright © 2025 [Mintplex Labs][profile-link]. <br />
+Copyright © 2026 [Mintplex Labs][profile-link]. <br />
 This project is [MIT](../LICENSE) licensed.
 
 </div>

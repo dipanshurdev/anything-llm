@@ -6,7 +6,7 @@ import { v4 } from "uuid";
 
 const WorkspaceThread = {
   all: async function (workspaceSlug) {
-    const { threads } = await fetch(
+    const { threads, defaultThreadChatCount } = await fetch(
       `${API_BASE}/workspace/${workspaceSlug}/threads`,
       {
         method: "GET",
@@ -15,10 +15,10 @@ const WorkspaceThread = {
     )
       .then((res) => res.json())
       .catch(() => {
-        return { threads: [] };
+        return { threads: [], defaultThreadChatCount: 0 };
       });
 
-    return { threads };
+    return { threads, defaultThreadChatCount };
   },
   new: async function (workspaceSlug) {
     const { thread, error } = await fetch(
@@ -184,18 +184,19 @@ const WorkspaceThread = {
         return false;
       });
   },
-  _updateChatResponse: async function (
+  _updateChat: async function (
     workspaceSlug = "",
     threadSlug = "",
     chatId,
-    newText
+    newText,
+    role = "assistant"
   ) {
     return await fetch(
       `${API_BASE}/workspace/${workspaceSlug}/thread/${threadSlug}/update-chat`,
       {
         method: "POST",
         headers: baseHeaders(),
-        body: JSON.stringify({ chatId, newText }),
+        body: JSON.stringify({ chatId, newText, role }),
       }
     )
       .then((res) => {

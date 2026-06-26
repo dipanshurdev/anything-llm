@@ -1,5 +1,9 @@
-const { maximumChunkLength } = require("../../helpers");
+const {
+  maximumChunkLength,
+  reportEmbeddingProgress,
+} = require("../../helpers");
 const { Ollama } = require("ollama");
+const { OllamaAILLM } = require("../../AiProviders/ollama");
 
 class OllamaEmbedder {
   constructor() {
@@ -16,10 +20,15 @@ class OllamaEmbedder {
       : 1;
     this.embeddingMaxChunkLength = maximumChunkLength();
     this.authToken = process.env.OLLAMA_AUTH_TOKEN;
+
     const headers = this.authToken
       ? { Authorization: `Bearer ${this.authToken}` }
       : {};
-    this.client = new Ollama({ host: this.basePath, headers });
+    this.client = new Ollama({
+      host: this.basePath,
+      headers,
+      fetch: OllamaAILLM.applyOllamaFetch(),
+    });
     this.log(
       `initialized with model ${this.model} at ${this.basePath}. Batch size: ${this.maxConcurrentChunks}, num_ctx: ${this.embeddingMaxChunkLength}`
     );
@@ -34,7 +43,11 @@ class OllamaEmbedder {
    * @returns {Promise<boolean>} - A promise that resolves to true if the service is alive, false otherwise.
    */
   async #isAlive() {
-    return await fetch(this.basePath)
+    const headers = this.authToken
+      ? { Authorization: `Bearer ${this.authToken}` }
+      : {};
+
+    return await fetch(this.basePath, { headers })
       .then((res) => res.ok)
       .catch((e) => {
         this.log(e.message);
@@ -105,6 +118,7 @@ class OllamaEmbedder {
         // but input param returns an array of embeddings (number[][]) for batch processing.
         // This is why we spread the embeddings array into the data array.
         data.push(...embeddings);
+        reportEmbeddingProgress(data.length, textChunks.length);
         this.log(
           `Batch ${currentBatch}/${totalBatches}: Embedded ${embeddings.length} chunks. Total: ${data.length}/${textChunks.length}`
         );

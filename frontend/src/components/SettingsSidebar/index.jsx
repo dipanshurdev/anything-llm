@@ -4,15 +4,16 @@ import useLogo from "@/hooks/useLogo";
 import {
   House,
   List,
-  Robot,
   Flask,
   Gear,
   UserCircleGear,
   PencilSimpleLine,
   Nut,
   Toolbox,
-  Globe,
+  Plugs,
 } from "@phosphor-icons/react";
+import AgentIcon from "@/media/animations/agent-static.png";
+import CommunityHubIcon from "@/media/illustrations/community-hub.png";
 import useUser from "@/hooks/useUser";
 import { isMobile } from "react-device-detect";
 import Footer from "../Footer";
@@ -256,6 +257,12 @@ const SidebarOptions = ({ user = null, t }) => (
               flex: true,
               roles: ["admin"],
             },
+            {
+              btnText: t("settings.model-router"),
+              href: paths.settings.modelRouters(),
+              flex: true,
+              roles: ["admin"],
+            },
           ]}
         />
         <Option
@@ -295,30 +302,43 @@ const SidebarOptions = ({ user = null, t }) => (
         />
         <Option
           btnText={t("settings.agent-skills")}
-          icon={<Robot className="h-5 w-5 flex-shrink-0" />}
+          icon={
+            <img
+              src={AgentIcon}
+              alt="Agent"
+              className="h-5 w-5 flex-shrink-0 light:invert"
+            />
+          }
           href={paths.settings.agentSkills()}
           user={user}
           flex={true}
           roles={["admin"]}
         />
         <Option
-          btnText="Community Hub"
-          icon={<Globe className="h-5 w-5 flex-shrink-0" />}
+          btnText={t("settings.community-hub.title")}
+          icon={
+            <img
+              src={CommunityHubIcon}
+              alt="Community Hub"
+              className="h-5 w-5 flex-shrink-0 light:invert"
+            />
+          }
+          user={user}
           childOptions={[
             {
-              btnText: "Explore Trending",
+              btnText: t("settings.community-hub.trending"),
               href: paths.communityHub.trending(),
               flex: true,
               roles: ["admin"],
             },
             {
-              btnText: "Your Account",
+              btnText: t("settings.community-hub.your-account"),
               href: paths.communityHub.authentication(),
               flex: true,
               roles: ["admin"],
             },
             {
-              btnText: "Import Item",
+              btnText: t("settings.community-hub.import-item"),
               href: paths.communityHub.importItem(),
               flex: true,
               roles: ["admin"],
@@ -351,6 +371,19 @@ const SidebarOptions = ({ user = null, t }) => (
           ]}
         />
         <Option
+          btnText={t("settings.channels")}
+          icon={<Plugs className="h-5 w-5 flex-shrink-0" />}
+          user={user}
+          childOptions={[
+            {
+              btnText: t("settings.available-channels.telegram"),
+              href: paths.settings.telegram(),
+              flex: true,
+              hidden: !!user,
+            },
+          ]}
+        />
+        <Option
           btnText={t("settings.tools")}
           icon={<Toolbox className="h-5 w-5 flex-shrink-0" />}
           user={user}
@@ -367,6 +400,12 @@ const SidebarOptions = ({ user = null, t }) => (
               href: paths.settings.logs(),
               flex: true,
               roles: ["admin"],
+            },
+            {
+              btnText: t("settings.scheduled-jobs"),
+              href: paths.settings.scheduledJobs(),
+              flex: true,
+              hidden: !!user,
             },
             {
               btnText: t("settings.api-keys"),

@@ -1,13 +1,15 @@
 const { Telemetry } = require("../../models/telemetry");
-const {
-  SUPPORTED_CONNECTION_METHODS,
-} = require("../AiProviders/bedrock/utils");
 const { resetAllVectorStores } = require("../vectorStore/resetAllVectorStores");
 
 const KEY_MAPPING = {
   LLMProvider: {
     envKey: "LLM_PROVIDER",
     checks: [isNotEmpty, supportedLLM],
+  },
+  // Model Router Settings
+  ModelRouterId: {
+    envKey: "MODEL_ROUTER_ID",
+    checks: [],
   },
   // OpenAI Settings
   OpenAiKey: {
@@ -32,7 +34,7 @@ const KEY_MAPPING = {
     checks: [isNotEmpty],
   },
   AzureOpenAiModelPref: {
-    envKey: "OPEN_MODEL_PREF",
+    envKey: "AZURE_OPENAI_MODEL_PREF",
     checks: [isNotEmpty],
   },
   AzureOpenAiEmbeddingModelPref: {
@@ -148,20 +150,6 @@ const KEY_MAPPING = {
     checks: [isNotEmpty],
   },
 
-  // Hugging Face LLM Inference Settings
-  HuggingFaceLLMEndpoint: {
-    envKey: "HUGGING_FACE_LLM_ENDPOINT",
-    checks: [isNotEmpty, isValidURL, validHuggingFaceEndpoint],
-  },
-  HuggingFaceLLMAccessToken: {
-    envKey: "HUGGING_FACE_LLM_API_KEY",
-    checks: [isNotEmpty],
-  },
-  HuggingFaceLLMTokenLimit: {
-    envKey: "HUGGING_FACE_LLM_TOKEN_LIMIT",
-    checks: [nonZero],
-  },
-
   // KoboldCPP Settings
   KoboldCPPBasePath: {
     envKey: "KOBOLD_CPP_BASE_PATH",
@@ -234,29 +222,10 @@ const KEY_MAPPING = {
     checks: [nonZero],
   },
 
-  // AWS Bedrock LLM InferenceSettings
-  AwsBedrockLLMConnectionMethod: {
-    envKey: "AWS_BEDROCK_LLM_CONNECTION_METHOD",
-    checks: [
-      (input) =>
-        SUPPORTED_CONNECTION_METHODS.includes(input) ? null : "invalid Value",
-    ],
-  },
-  AwsBedrockLLMAccessKeyId: {
-    envKey: "AWS_BEDROCK_LLM_ACCESS_KEY_ID",
-    checks: [],
-  },
-  AwsBedrockLLMAccessKey: {
-    envKey: "AWS_BEDROCK_LLM_ACCESS_KEY",
-    checks: [],
-  },
-  AwsBedrockLLMSessionToken: {
-    envKey: "AWS_BEDROCK_LLM_SESSION_TOKEN",
-    checks: [],
-  },
-  AwsBedrockLLMAPIKey: {
+  // AWS Bedrock LLM Settings
+  AwsBedrockLLMApiKey: {
     envKey: "AWS_BEDROCK_LLM_API_KEY",
-    checks: [],
+    checks: [isNotEmpty],
   },
   AwsBedrockLLMRegion: {
     envKey: "AWS_BEDROCK_LLM_REGION",
@@ -268,24 +237,6 @@ const KEY_MAPPING = {
   },
   AwsBedrockLLMTokenLimit: {
     envKey: "AWS_BEDROCK_LLM_MODEL_TOKEN_LIMIT",
-    checks: [nonZero],
-  },
-  AwsBedrockLLMMaxOutputTokens: {
-    envKey: "AWS_BEDROCK_LLM_MAX_OUTPUT_TOKENS",
-    checks: [nonZero],
-  },
-
-  // Dell Pro AI Studio Settings
-  DellProAiStudioBasePath: {
-    envKey: "DPAIS_LLM_BASE_PATH",
-    checks: [isNotEmpty, validDockerizedUrl],
-  },
-  DellProAiStudioModelPref: {
-    envKey: "DPAIS_LLM_MODEL_PREF",
-    checks: [isNotEmpty],
-  },
-  DellProAiStudioTokenLimit: {
-    envKey: "DPAIS_LLM_MODEL_TOKEN_LIMIT",
     checks: [nonZero],
   },
 
@@ -330,6 +281,14 @@ const KEY_MAPPING = {
   GenericOpenAiEmbeddingMaxConcurrentChunks: {
     envKey: "GENERIC_OPEN_AI_EMBEDDING_MAX_CONCURRENT_CHUNKS",
     checks: [nonZero],
+  },
+  GenericOpenAiEmbeddingPassagePrefix: {
+    envKey: "GENERIC_OPEN_AI_EMBEDDING_PASSAGE_PREFIX",
+    checks: [],
+  },
+  GenericOpenAiEmbeddingQueryPrefix: {
+    envKey: "GENERIC_OPEN_AI_EMBEDDING_QUERY_PREFIX",
+    checks: [],
   },
 
   // Vector Database Selection Settings
@@ -562,14 +521,6 @@ const KEY_MAPPING = {
   },
 
   // Agent Integration ENVs
-  AgentGoogleSearchEngineId: {
-    envKey: "AGENT_GSE_CTX",
-    checks: [],
-  },
-  AgentGoogleSearchEngineKey: {
-    envKey: "AGENT_GSE_KEY",
-    checks: [],
-  },
   AgentSerpApiKey: {
     envKey: "AGENT_SERPAPI_API_KEY",
     checks: [],
@@ -594,6 +545,10 @@ const KEY_MAPPING = {
     envKey: "AGENT_BING_SEARCH_API_KEY",
     checks: [],
   },
+  AgentBaiduSearchApiKey: {
+    envKey: "AGENT_BAIDU_SEARCH_API_KEY",
+    checks: [],
+  },
   AgentSerplyApiKey: {
     envKey: "AGENT_SERPLY_API_KEY",
     checks: [],
@@ -608,6 +563,22 @@ const KEY_MAPPING = {
   },
   AgentExaApiKey: {
     envKey: "AGENT_EXA_API_KEY",
+    checks: [],
+  },
+  AgentPerplexityApiKey: {
+    envKey: "AGENT_PERPLEXITY_API_KEY",
+    checks: [],
+  },
+  AgentBraveApiKey: {
+    envKey: "AGENT_BRAVE_API_KEY",
+    checks: [],
+  },
+  AgentCrwApiKey: {
+    envKey: "AGENT_CRW_API_KEY",
+    checks: [],
+  },
+  AgentCrwApiUrl: {
+    envKey: "AGENT_CRW_API_URL",
     checks: [],
   },
 
@@ -661,6 +632,76 @@ const KEY_MAPPING = {
     checks: [isValidURL],
   },
 
+  // Kokoro TTS (self-hosted kokoro-fastapi)
+  TTSKokoroEndpoint: {
+    envKey: "TTS_KOKORO_ENDPOINT",
+    checks: [isValidURL],
+  },
+  TTSKokoroKey: {
+    envKey: "TTS_KOKORO_KEY",
+    checks: [],
+  },
+  TTSKokoroVoiceModel: {
+    envKey: "TTS_KOKORO_VOICE_MODEL",
+    checks: [isNotEmpty],
+  },
+
+  // STT Selection
+  SpeechToTextProvider: {
+    envKey: "STT_PROVIDER",
+    checks: [supportedSTTProvider],
+  },
+
+  // STT OpenAI
+  STTOpenAIModel: {
+    envKey: "STT_OPEN_AI_MODEL",
+    checks: [],
+  },
+
+  // STT Lemonade
+  STTLemonadeBasePath: {
+    envKey: "STT_LEMONADE_BASE_PATH",
+    checks: [isValidURL],
+  },
+  STTLemonadeModelPref: {
+    envKey: "STT_LEMONADE_MODEL_PREF",
+    checks: [],
+  },
+
+  // STT Deepgram
+  STTDeepgramApiKey: {
+    envKey: "STT_DEEPGRAM_API_KEY",
+    checks: [isNotEmpty],
+  },
+  STTDeepgramModel: {
+    envKey: "STT_DEEPGRAM_MODEL",
+    checks: [isNotEmpty],
+  },
+
+  // STT OpenAI Generic
+  STTOpenAICompatibleKey: {
+    envKey: "STT_OPEN_AI_COMPATIBLE_KEY",
+    checks: [],
+  },
+  STTOpenAICompatibleModel: {
+    envKey: "STT_OPEN_AI_COMPATIBLE_MODEL",
+    checks: [],
+  },
+  STTOpenAICompatibleEndpoint: {
+    envKey: "STT_OPEN_AI_COMPATIBLE_ENDPOINT",
+    checks: [isValidURL],
+  },
+
+  // STT Groq
+  STTGroqApiKey: {
+    envKey: "STT_GROQ_API_KEY",
+    checks: [isNotEmpty],
+  },
+  STTGroqModel: {
+    envKey: "STT_GROQ_MODEL",
+    checks: [isNotEmpty],
+  },
+
   // DeepSeek Options
   DeepSeekApiKey: {
     envKey: "DEEPSEEK_API_KEY",
@@ -668,6 +709,26 @@ const KEY_MAPPING = {
   },
   DeepSeekModelPref: {
     envKey: "DEEPSEEK_MODEL_PREF",
+    checks: [isNotEmpty],
+  },
+
+  // Minimax Options
+  MinimaxApiKey: {
+    envKey: "MINIMAX_API_KEY",
+    checks: [isNotEmpty],
+  },
+  MinimaxModelPref: {
+    envKey: "MINIMAX_MODEL_PREF",
+    checks: [isNotEmpty],
+  },
+
+  // Cerebras Options
+  CerebrasApiKey: {
+    envKey: "CEREBRAS_API_KEY",
+    checks: [isNotEmpty],
+  },
+  CerebrasModelPref: {
+    envKey: "CEREBRAS_MODEL_PREF",
     checks: [isNotEmpty],
   },
 
@@ -827,6 +888,38 @@ const KEY_MAPPING = {
     envKey: "SAMBANOVA_LLM_MODEL_PREF",
     checks: [isNotEmpty],
   },
+
+  // Lemonade Options
+  LemonadeLLMBasePath: {
+    envKey: "LEMONADE_LLM_BASE_PATH",
+    checks: [isValidURL],
+  },
+  LemonadeLLMApiKey: {
+    envKey: "LEMONADE_LLM_API_KEY",
+    checks: [],
+  },
+  LemonadeLLMModelPref: {
+    envKey: "LEMONADE_LLM_MODEL_PREF",
+    checks: [isNotEmpty],
+  },
+  LemonadeLLMModelTokenLimit: {
+    envKey: "LEMONADE_LLM_MODEL_TOKEN_LIMIT",
+    checks: [nonZero],
+  },
+
+  // Agent Skill Settings
+  AgentSkillMaxToolCalls: {
+    envKey: "AGENT_MAX_TOOL_CALLS",
+    checks: [nonZero],
+  },
+  AgentSkillRerankerEnabled: {
+    envKey: "AGENT_SKILL_RERANKER_ENABLED",
+    checks: [],
+  },
+  AgentSkillRerankerTopN: {
+    envKey: "AGENT_SKILL_RERANKER_TOP_N",
+    checks: [nonZero],
+  },
 };
 
 function isNotEmpty(input = "") {
@@ -847,7 +940,7 @@ function isValidURL(input = "") {
   try {
     new URL(input);
     return null;
-  } catch (e) {
+  } catch {
     return "URL is not a valid URL.";
   }
 }
@@ -892,8 +985,21 @@ function supportedTTSProvider(input = "") {
     "elevenlabs",
     "piper_local",
     "generic-openai",
+    "kokoro",
   ].includes(input);
   return validSelection ? null : `${input} is not a valid TTS provider.`;
+}
+
+function supportedSTTProvider(input = "") {
+  const validSelection = [
+    "native",
+    "openai",
+    "lemonade",
+    "deepgram",
+    "groq",
+    "generic-openai",
+  ].includes(input);
+  return validSelection ? null : `${input} is not a valid STT provider.`;
 }
 
 function validLocalWhisper(input = "") {
@@ -918,7 +1024,6 @@ function supportedLLM(input = "") {
     "togetherai",
     "fireworksai",
     "mistral",
-    "huggingface",
     "perplexity",
     "openrouter",
     "novita",
@@ -934,7 +1039,6 @@ function supportedLLM(input = "") {
     "xai",
     "nvidia-nim",
     "ppio",
-    "dpais",
     "moonshotai",
     "cometapi",
     "foundry",
@@ -943,6 +1047,10 @@ function supportedLLM(input = "") {
     "docker-model-runner",
     "privatemode",
     "sambanova",
+    "lemonade",
+    "minimax",
+    "cerebras",
+    "anythingllm-router",
   ].includes(input);
   return validSelection ? null : `${input} is not a valid LLM provider.`;
 }
@@ -981,6 +1089,7 @@ function supportedEmbeddingModel(input = "") {
     "generic-openai",
     "mistral",
     "openrouter",
+    "lemonade",
   ];
   return supported.includes(input)
     ? null
@@ -1044,12 +1153,6 @@ async function validDockerizedUrl(input = "") {
   }
 
   return null;
-}
-
-function validHuggingFaceEndpoint(input = "") {
-  return input.slice(-6) !== ".cloud"
-    ? `Your HF Endpoint should end in ".cloud"`
-    : null;
 }
 
 function noRestrictedChars(input = "") {
@@ -1254,6 +1357,7 @@ function dumpENV() {
 
     "STORAGE_DIR",
     "SERVER_PORT",
+    "COLLECTOR_PORT",
     // For persistent data encryption
     "SIG_KEY",
     "SIG_SALT",
@@ -1271,6 +1375,7 @@ function dumpENV() {
     "HTTPS_KEY_PATH",
     // Other Configuration Keys
     "DISABLE_VIEW_CHAT_HISTORY",
+    "DISABLE_SWAGGER_DOCS",
     // Simple SSO
     "SIMPLE_SSO_ENABLED",
     "SIMPLE_SSO_NO_LOGIN",
@@ -1303,6 +1408,23 @@ function dumpENV() {
 
     // Allow disabling of streaming for AWS Bedrock
     "AWS_BEDROCK_STREAMING_DISABLED",
+
+    // Allow capabilities for specific providers.
+    "PROVIDER_DISABLE_NATIVE_TOOL_CALLING",
+    "PROVIDER_SUPPORTS_REASONING",
+    "PROVIDER_SUPPORTS_IMAGE_GENERATION",
+    "PROVIDER_SUPPORTS_VISION",
+    "GENERIC_OPEN_AI_REPORT_USAGE",
+
+    // Allow auto-approval of skills
+    "AGENT_AUTO_APPROVED_SKILLS",
+
+    // Allow setting a custom fetch timeouts for providers
+    "ANYTHINGLLM_FETCH_TIMEOUT",
+    "ANYTHINGLLM_MAX_RETRIES",
+
+    // Deny-by-default for embed widgets that have no allowlist configured
+    "EMBED_REQUIRE_ALLOWLIST",
   ];
 
   // Simple sanitization of each value to prevent ENV injection via newline or quote escaping.

@@ -15,9 +15,9 @@ class PerplexityProvider extends InheritMultiple([Provider, UnTooled]) {
     const client = new OpenAI({
       baseURL: "https://api.perplexity.ai",
       apiKey: process.env.PERPLEXITY_API_KEY ?? null,
-      maxRetries: 3,
     });
 
+    this.providerTag = "perplexity";
     this._client = client;
     this.model = model;
     this.verbose = true;
@@ -29,6 +29,17 @@ class PerplexityProvider extends InheritMultiple([Provider, UnTooled]) {
 
   get supportsAgentStreaming() {
     return true;
+  }
+
+  /**
+   * Whether this provider supports native OpenAI-compatible tool calling.
+   * - Perplexity does not support tool calling at all and does not have API support for it.
+   * so until that changes we will use Untooled to get at least a general agentic experience with
+   * our tools.
+   * @returns {boolean}
+   */
+  async supportsNativeToolCalling() {
+    return false;
   }
 
   async #handleFunctionCallChat({ messages = [] }) {

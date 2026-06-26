@@ -2,9 +2,13 @@ const OpenAI = require("openai");
 const Provider = require("./ai-provider.js");
 const InheritMultiple = require("./helpers/classes.js");
 const UnTooled = require("./helpers/untooled.js");
+const { tooledStream, tooledComplete } = require("./helpers/tooled.js");
+const { RetryError } = require("../error.js");
 
 /**
  * The agent provider for the LocalAI provider.
+ * Supports native OpenAI-compatible tool calling when enabled via ENV,
+ * falling back to the UnTooled prompt-based approach otherwise.
  */
 class LocalAiProvider extends InheritMultiple([Provider, UnTooled]) {
   model;
@@ -15,12 +19,13 @@ class LocalAiProvider extends InheritMultiple([Provider, UnTooled]) {
     const client = new OpenAI({
       baseURL: process.env.LOCAL_AI_BASE_PATH,
       apiKey: process.env.LOCAL_AI_API_KEY ?? null,
-      maxRetries: 3,
     });
 
+    this.providerTag = "localai";
     this._client = client;
     this.model = model;
     this.verbose = true;
+    this._supportsToolCalling = null;
   }
 
   get client() {
@@ -31,6 +36,8 @@ class LocalAiProvider extends InheritMultiple([Provider, UnTooled]) {
     return true;
   }
 
+  // ---- UnTooled callbacks (used when native tool calling is not supported) ----
+
   async #handleFunctionCallChat({ messages = [] }) {
     return await this.client.chat.completions
       .create({
@@ -40,10 +47,8 @@ class LocalAiProvider extends InheritMultiple([Provider, UnTooled]) {
       .then((result) => {
         if (!result.hasOwnProperty("choices"))
           throw new Error("LocalAI chat: No results!");
-
         if (result.choices.length === 0)
           throw new Error("LocalAI chat: No results length!");
-
         return result.choices[0].message.content;
       })
       .catch((_) => {
@@ -59,23 +64,94 @@ class LocalAiProvider extends InheritMultiple([Provider, UnTooled]) {
     });
   }
 
+  /**
+   * Stream a chat completion with tool calling support.
+   * Uses native tool calling when supported, otherwise falls back to UnTooled.
+   */
   async stream(messages, functions = [], eventHandler = null) {
-    return await UnTooled.prototype.stream.call(
-      this,
-      messages,
-      functions,
-      this.#handleFunctionCallStream.bind(this),
-      eventHandler
+    const useNative =
+      functions.length > 0 && (await this.supportsNativeToolCalling());
+
+    if (!useNative) {
+      return await UnTooled.prototype.stream.call(
+        this,
+        messages,
+        functions,
+        this.#handleFunctionCallStream.bind(this),
+        eventHandler
+      );
+    }
+
+    this.providerLog(
+      "Provider.stream (tooled) - will process this chat completion."
     );
+
+    try {
+      return await tooledStream(
+        this.client,
+        this.model,
+        messages,
+        functions,
+        eventHandler,
+        { provider: this }
+      );
+    } catch (error) {
+      console.error(error.message, error);
+      if (error instanceof OpenAI.AuthenticationError) throw error;
+      if (
+        error instanceof OpenAI.RateLimitError ||
+        error instanceof OpenAI.InternalServerError ||
+        error instanceof OpenAI.APIError
+      ) {
+        throw new RetryError(error.message);
+      }
+      throw error;
+    }
   }
 
+  /**
+   * Create a non-streaming completion with tool calling support.
+   * Uses native tool calling when supported, otherwise falls back to UnTooled.
+   */
   async complete(messages, functions = []) {
-    return await UnTooled.prototype.complete.call(
-      this,
-      messages,
-      functions,
-      this.#handleFunctionCallChat.bind(this)
-    );
+    const useNative =
+      functions.length > 0 && (await this.supportsNativeToolCalling());
+
+    if (!useNative) {
+      return await UnTooled.prototype.complete.call(
+        this,
+        messages,
+        functions,
+        this.#handleFunctionCallChat.bind(this)
+      );
+    }
+
+    try {
+      const result = await tooledComplete(
+        this.client,
+        this.model,
+        messages,
+        functions,
+        this.getCost.bind(this),
+        { provider: this }
+      );
+
+      if (result.retryWithError) {
+        return this.complete([...messages, result.retryWithError], functions);
+      }
+
+      return result;
+    } catch (error) {
+      if (error instanceof OpenAI.AuthenticationError) throw error;
+      if (
+        error instanceof OpenAI.RateLimitError ||
+        error instanceof OpenAI.InternalServerError ||
+        error instanceof OpenAI.APIError
+      ) {
+        throw new RetryError(error.message);
+      }
+      throw error;
+    }
   }
 
   /**

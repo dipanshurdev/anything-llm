@@ -73,7 +73,16 @@ function workspaceThreadEndpoints(app) {
           workspace_id: workspace.id,
           user_id: user?.id || null,
         });
-        response.status(200).json({ threads });
+
+        const defaultThreadChatCount = await WorkspaceChats.count({
+          workspaceId: workspace.id,
+          user_id: user?.id || null,
+          thread_id: null,
+          api_session_id: null,
+          include: true,
+        });
+
+        response.status(200).json({ threads, defaultThreadChatCount });
       } catch (e) {
         console.error(e.message, e);
         response.sendStatus(500).end();
@@ -216,9 +225,9 @@ function workspaceThreadEndpoints(app) {
     ],
     async (request, response) => {
       try {
-        const { chatId, newText = null } = reqBody(request);
+        const { chatId, newText = null, role = "assistant" } = reqBody(request);
         if (!newText || !String(newText).trim())
-          throw new Error("Cannot save empty response");
+          throw new Error("Cannot save empty edit");
 
         const user = await userFromSession(request, response);
         const workspace = response.locals.workspace;
@@ -231,15 +240,20 @@ function workspaceThreadEndpoints(app) {
         });
         if (!existingChat) throw new Error("Invalid chat.");
 
-        const chatResponse = safeJsonParse(existingChat.response, null);
-        if (!chatResponse) throw new Error("Failed to parse chat response");
-
-        await WorkspaceChats._update(existingChat.id, {
-          response: JSON.stringify({
-            ...chatResponse,
-            text: String(newText),
-          }),
-        });
+        if (role === "user") {
+          await WorkspaceChats._update(existingChat.id, {
+            prompt: String(newText),
+          });
+        } else {
+          const chatResponse = safeJsonParse(existingChat.response, null);
+          if (!chatResponse) throw new Error("Failed to parse chat response");
+          await WorkspaceChats._update(existingChat.id, {
+            response: JSON.stringify({
+              ...chatResponse,
+              text: String(newText),
+            }),
+          });
+        }
 
         response.sendStatus(200).end();
       } catch (e) {
